@@ -8,6 +8,8 @@ https://demozoo.org/productions/224978/
 
 This source code has been developed using the [Amiga Assembly](https://github.com/prb28/vscode-amiga-assembly) extension for Visual Studio Code on a Mac with FS-UAE.
 
+The code was originally disassembled using the (IRA V1.05beta decompiler)[http://aminet.net/package/dev/asm/ira105_src]. It has been worked on a lot since then.
+
 The soundtracker mod file "DemonDownloader" was ripped from the binary using an Action Replay 3 tracker command running in FS-UAE.
 
 The font was ripped from the binary using an Action Replay 3 to view the memory then adjusting the modulo until the image could be saved as an IFF file. This IFF file was then converted to RAW format using [IFF Converter](http://janeway.exotica.org.uk/release.php?id=19257) by Kefrens.
