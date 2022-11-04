@@ -177,7 +177,7 @@ LAB_0008:
 ; A0 - Source
 ; A1 - Destination
 BLITTEXT:
-	MOVEM.L	A0-A1,-(A7)
+	MOVEM.L	A0-A1,-(A7)				; Save A0 and A1 to the stack
 	BSR		BWAIT
 	MOVE.L	#$FFFFFFFF,BLTAFWM(A5)	; Set BLTAFWM (blitter mask)
 	MOVE	#$002C,BLTAMOD(A5)		; Set BLTAMOD (blitter modulo for source A)
@@ -203,8 +203,8 @@ BLITTEXT:
 	MOVE	#$0802,BLTSIZE(A5)		; Set BLTSIZE
 	ADDA.L	#$00002580,A0
 	ADDA.L	#$00002580,A1
-	MOVEM.L	(A7)+,A0-A1
-	RTS
+	MOVEM.L	(A7)+,A0-A1				; Restore A0 and A1 from the stack
+	RTS								; return
 
 
 CLS:
@@ -365,27 +365,27 @@ FREESYSTEM:
 
 
 SYSTEMINTS:
-	DS.W	1			;00508
+	DS.W	1
 SYSTEMDMA:
-	DS.W	1			;0050A
+	DS.W	1
 LEVEL2VECTOR:
-	DS.L	1			;0050C
+	DS.L	1
 LEVEL3VECTOR:
-	DS.L	1			;00510
+	DS.L	1
 TRAP0ADDR:
-	DS.L	1			;00514
+	DS.L	1
 TRAP1ADDR:
-	DS.L	1			;00518
+	DS.L	1
 TRAP2ADDR:
-	DS.L	1			;0051C
+	DS.L	1
 TRAP3ADDR:
-	DS.L	1			;00520
+	DS.L	1
 TRAP4ADDR:
-	DS.L	1			;00524
+	DS.L	1
 DOSBASE:
-	DS.L	1			;00528
+	DS.L	1
 GFXBASE:
-	DS.L	1			;0052C
+	DS.L	1
 DOSNAME:
 	DC.B	"dos.library",0
 	EVEN
@@ -528,7 +528,7 @@ COLOURPALETTE:
 
 ; Reserve space for the screen in chip memory.
 	SECTION S_1,BSS,CHIP
-
+	
 SCREEN:
 	DS.W	1			;13CA4
 LAB_0086:
