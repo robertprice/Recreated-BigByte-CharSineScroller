@@ -153,13 +153,13 @@ SCROLLVISIBLE:
     LSL		#4,D0
     OR		D1,D0
     SUB		D0,SCRVAL
-    BPL.S	LAB_0008
+    BPL.S	.EndScrollVisible
     ADDI	#$0110,SCRVAL
     ADDQ	#2,PL1L
     ADDQ	#2,PL2L
     ADDQ	#2,PL3L
     SUBQ	#2,POINTEROFFSET
-    BPL.S	LAB_0008
+    BPL.S	.EndScrollVisible
     ADDQ	#4,POINTEROFFSET
     SUBQ	#4,PL1L
     SUBQ	#4,PL2L
