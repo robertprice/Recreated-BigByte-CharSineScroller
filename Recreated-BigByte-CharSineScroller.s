@@ -122,12 +122,12 @@ EXIT:
 SINEBLIT:
     LEA		LAB_008C,A0
     MOVEA.L	#LAB_0087,A2
-    LEA		(SINEDATA,PC),A4
-    ADDA.L	(SINEPTR,PC),A4
-    ADDQ.L	#2,SINEPTR
-    CMPI.L	#$000000FE,SINEPTR
-    BNE.S	LAB_0004
-    SUBI.L	#$000000FE,SINEPTR
+    LEA		(SINEDATA,PC),A4	; Set A4 to the start of the sine table
+    ADDA.L	(SINEPTR,PC),A4		; Add the offset of the sineptr to A4 to get the current position in the sine table
+    ADDQ.L	#2,SINEPTR			; increment the SINEPTR by 2 to get the next position in the sinetable
+    CMPI.L	#SINELEN,SINEPTR	; check if the SINEPTR is greater than the length of the sine table
+    BNE.S	LAB_0004			; if it isn't skip the next instruction
+    SUBI.L	#SINELEN,SINEPTR	; reset SINEPTR
 LAB_0004:
     MOVEQ	#11,D6
 LAB_0005:
@@ -136,7 +136,7 @@ LAB_0005:
     LEA		(4,A4),A4
     CMPA.L	#SINEEND,A4
     BLT.S	LAB_0006
-    SUBA.L	#$000000FE,A4
+    SUBA.L	#SINELEN,A4			; Reset A4 to the start of the sine table
 LAB_0006:
     MULS	#$0030,D0
     ADDA.L	D0,A1
@@ -167,10 +167,10 @@ SCROLLVISIBLE:
     BSR		SCROLLHIDDEN
     BSR		DOCHAR
     ADDI.L	#$00000004,SINEPTR
-    CMPI.L	#$000000FE,SINEPTR
-    BLT.S	LAB_0008
-    SUBI.L	#$000000FE,SINEPTR
-LAB_0008:
+    CMPI.L	#SINELEN,SINEPTR
+    BLT.S	.EndScrollVisible
+    SUBI.L	#SINELEN,SINEPTR
+.EndScrollVisible:
     RTS
 
 ; Blit the text
@@ -188,19 +188,19 @@ BLITTEXT:
     BSR		BWAIT			
     MOVE.L	A0,BLTAPTH(A5)			; Set BLTAPTH
     MOVE.L	A1,BLTDPTH(A5)			; Set BLTDPTH
-    MOVE	#$0802,BLTSIZE(A5)		; Set BLTSIZE
+    MOVE	#$0802,BLTSIZE(A5)		; Set BLTSIZE with height 32 and width 2
     ADDA.L	#$00002580,A0
     ADDA.L	#$00002580,A1
     BSR		BWAIT
     MOVE.L	A0,BLTAPTH(A5)			; Set BLTAPTH
     MOVE.L	A1,BLTDPTH(A5)			; Set BLTDPTH
-    MOVE	#$0802,BLTSIZE(A5)		; Set BLTSIZE
+    MOVE	#$0802,BLTSIZE(A5)		; Set BLTSIZE with height 32 and width 2
     ADDA.L	#$00002580,A0
     ADDA.L	#$00002580,A1
     BSR		BWAIT
     MOVE.L	A0,BLTAPTH(A5)			; Set BLTAPTH
     MOVE.L	A1,BLTDPTH(A5)			; Set BLTDPTH
-    MOVE	#$0802,BLTSIZE(A5)		; Set BLTSIZE
+    MOVE	#$0802,BLTSIZE(A5)		; Set BLTSIZE with height 32 and width 2
     ADDA.L	#$00002580,A0
     ADDA.L	#$00002580,A1
     MOVEM.L	(A7)+,A0-A1				; Restore A0 and A1 from the stack
@@ -213,19 +213,19 @@ CLS:
     MOVE.L	A0,BLTDPTH(A5)
     MOVE	#$0000,BLTDMOD(A5)
     MOVE	#$0100,BLTCON0(A5)
-    MOVE	#$2818,BLTSIZE(A5)
+    MOVE	#$2818,BLTSIZE(A5)	; Set BLTSIZE with height 80 and width 24
     ADDA.L	#$00002580,A0
     BSR		BWAIT
     MOVE.L	A0,BLTDPTH(A5)
     MOVE	#$0000,BLTDMOD(A5)
     MOVE	#$0100,BLTCON0(A5)
-    MOVE	#$2818,BLTSIZE(A5)
+    MOVE	#$2818,BLTSIZE(A5)	; Set BLTSIZE with height 80 and width 24
     ADDA.L	#$00002580,A0
     BSR		BWAIT
     MOVE.L	A0,BLTDPTH(A5)
     MOVE	#$0000,BLTDMOD(A5)
     MOVE	#$0100,BLTCON0(A5)
-    MOVE	#$2818,BLTSIZE(A5)
+    MOVE	#$2818,BLTSIZE(A5)	; Set BLTSIZE with height 80 and width 24
     ADDA.L	#$00002580,A0
     RTS
 
@@ -240,19 +240,19 @@ SCROLLHIDDEN:
     BSR		BWAIT
     MOVE.L	A0,BLTAPTH(A5)
     MOVE.L	A1,BLTDPTH(A5)
-    MOVE	#$0816,BLTSIZE(A5)
+    MOVE	#$0816,BLTSIZE(A5)	; set BLTSIZE with height 32 and width 22
     ADDA.L	#$00002580,A0
     ADDA.L	#$00002580,A1
     BSR		BWAIT
     MOVE.L	A0,BLTAPTH(A5)
     MOVE.L	A1,BLTDPTH(A5)
-    MOVE	#$0816,BLTSIZE(A5)
+    MOVE	#$0816,BLTSIZE(A5)	; set BLTSIZE with height 32 and width 22
     ADDA.L	#$00002580,A0
     ADDA.L	#$00002580,A1
     BSR		BWAIT
     MOVE.L	A0,BLTAPTH(A5)
     MOVE.L	A1,BLTDPTH(A5)
-    MOVE	#$0816,BLTSIZE(A5)
+    MOVE	#$0816,BLTSIZE(A5)	; set BLTSIZE with height 32 and width 22
     ADDA.L	#$00002580,A0
     ADDA.L	#$00002580,A1
     RTS
@@ -291,21 +291,21 @@ BLITLETTER:
     BSR		BWAIT
     MOVE.L	A0,BLTAPTH(A5)
     MOVE.L	A1,BLTDPTH(A5)
-    MOVE	#$0802,BLTSIZE(A5)		; BLTSIZE (win/width, height) 0000100000000010    height = 32, width = 2
+    MOVE	#$0802,BLTSIZE(A5)	; BLTSIZE (win/width, height) 0000100000000010    height = 32, width = 2
 ;	ADDA.L	#$00001F40,A0		; 8000 bytes (320x200 font size)
     ADDA.L	#$00001900,A0		; 6400 bytes (320x160 font size)
     ADDA.L	#$00002580,A1		; 9600 bytes (320x240 screen size)
     BSR		BWAIT
     MOVE.L	A0,BLTAPTH(A5)
     MOVE.L	A1,BLTDPTH(A5)
-    MOVE	#$0802,BLTSIZE(A5)
+    MOVE	#$0802,BLTSIZE(A5)	; BLTSIZE (win/width, height) 0000100000000010    height = 32, width = 2
 ;	ADDA.L	#$00001F40,A0
     ADDA.L	#$00001900,A0
     ADDA.L	#$00002580,A1
     BSR		BWAIT
     MOVE.L	A0,BLTAPTH(A5)
     MOVE.L	A1,BLTDPTH(A5)
-    MOVE	#$0802,BLTSIZE(A5)
+    MOVE	#$0802,BLTSIZE(A5)	; BLTSIZE (win/width, height) 0000100000000010    height = 32, width = 2
 ;	ADDA.L	#$00001F40,A0
     ADDA.L	#$00001900,A0
     ADDA.L	#$00002580,A1
@@ -323,7 +323,7 @@ WAITBEAM:
 
 ; Wait for the blitter to be free.
 BWAIT:
-    BTST    #$E,DMACONR(A5)		; test DMACONR
+    BTST    #$E,DMACONR(A5)		; test DMACONR bit 14 BBUSY (Blitter Busy) flag.
     BNE.S	BWAIT
     RTS
 
@@ -411,10 +411,10 @@ LoadColours:
 COPLIST:
     DC.W	$01FC,$0000
     DC.W	$0106,$0000
-    DC.W	DIWSTRT,$2C81
-    DC.W	DIWSTOP,$F4C1
-    DC.W	DDFSTRT,$0030
-    DC.W	DDFSTOP,$00D0
+    DC.W	DIWSTRT,$2C81	; Set DIWSTRT to vertical 44 and horizontal 129
+    DC.W	DIWSTOP,$F4C1	; Set DIWSTOP to vertical 244 and horizontal 193
+    DC.W	DDFSTRT,$0030	; Set DDFSTRT to wide.
+    DC.W	DDFSTOP,$00D0	; Set DDFSTOP to normal.
     DC.W	BPLCON0,$3200
     DC.W	BPLCON1
 SCRVAL:
@@ -474,6 +474,8 @@ SINEDATA:
     DC.L	$00630066,$0069006C,$00720075
     DC.W	$0076
 SINEEND:
+
+SINELEN 	EQU SINEEND-SINEDATA				; The length of the sine table
 
 ; offsets of the characters in the font. - guess by Rob seems to offset by 40 bytes - 320 pixels
 CHARACTEROFFSETS:
