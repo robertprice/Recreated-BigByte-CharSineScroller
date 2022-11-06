@@ -73,7 +73,7 @@ START:
 ; initialise the soundtracker module.
     JSR		mt_init
 
-    LEA		(SCROLLER,PC),A3
+    LEA		(SCROLLER,PC),A3		; load the start address of the scroll text into A3
 MAIN:
 ; wait for the vertical raster beam to be in position.
     MOVEM.L	D0-D1,-(A7)
@@ -257,36 +257,36 @@ SCROLLHIDDEN:
     ADDA.L	#$00002580,A1
     RTS
 
-
+; A3 = address of current letter in the scoll text.
 DOCHAR:
-    LEA		(ASCIIVALUES,PC),A1
-    LEA		(CHARACTEROFFSETS,PC),A2
-    MOVEQ	#0,D0
+    LEA		(ASCIIVALUES,PC),A1			; load the start address of the ascii values into A1
+    LEA		(CHARACTEROFFSETS,PC),A2	; load the start address of the character offsets in the font into A2
+    MOVEQ	#0,D0						; clear D0, we use this to store the current character
 NEWCHAR:
-    MOVE.B	(A3)+,D0
-    BNE.S	GOTLETTER
+    MOVE.B	(A3)+,D0					; get the current letter of the scroll text in D0 and move to the addres of the next character in A3
+    BNE.S	GOTLETTER					; if we've not got a letter we need to restart the scroll text
 ENDOFSCROLL:
-    LEA		(SCROLLER,PC),A3
-    BRA.S	NEWCHAR
+    LEA		(SCROLLER,PC),A3			; load the start address of the scroll text into A3
+    BRA.S	NEWCHAR						; look for the next character
 GOTLETTER:
-    CMP.B	#$05,D0
-    BNE.S	TRYAGAIN
-    MOVE.B	(A3)+,D0
-    MOVE	D0,SPEED
-    BRA.S	NEWCHAR
+    CMP.B	#$05,D0						; is the character $5? If it is it's a control character and the next byte will be the scroller speed
+    BNE.S	TRYAGAIN					; not a control character so skip to TRYAGAIN
+    MOVE.B	(A3)+,D0					; get the controller speed 
+    MOVE	D0,SPEED					; save the speed to the SPEED in memory
+    BRA.S	NEWCHAR						; get the next character
 TRYAGAIN:
-    MOVE	(A2)+,D2
-    CMP.B	(A1)+,D0
-    BNE.S	TRYAGAIN
+    MOVE	(A2)+,D2					; get the character offset into D2 and increment A2 to the next location
+    CMP.B	(A1)+,D0					; does the character the ascii values match the value in the scroll text?
+    BNE.S	TRYAGAIN					; if it doesn't we loop back to try the next character
 BLITLETTER:
-    BSR		BWAIT
+    BSR		BWAIT						; wait for the blitter to be ready.
     MOVE.L	#$FFFFFFFF,BLTAFWM(A5)
     MOVE	#$0024,BLTAMOD(A5)
     MOVE	#$002C,BLTDMOD(A5)
     MOVE	#$09F0,BLTCON0(A5)
     CLR		BLTCON1(A5)
-    LEA		FONT,A0
-    ADDA	D2,A0
+    LEA		FONT,A0						; load the address of our font image into A0
+    ADDA	D2,A0						; add the offset of the current character to A0 so we should be pointing to the address of the character we need to blit.
     LEA		LAB_008D,A1
     BSR		BWAIT
     MOVE.L	A0,BLTAPTH(A5)
