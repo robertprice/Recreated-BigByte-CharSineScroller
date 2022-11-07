@@ -46,17 +46,17 @@ START:
 ; move the addresses of the 3 visible bitplanes into the copper list
 ; these will be set to the bitplane registers in the copper list.
     MOVE.L	#LAB_0086,D0
-    MOVE	D0,PL1L	
+    MOVE	D0,PL1L+2	
     SWAP	D0
-    MOVE	D0,PL1H
+    MOVE	D0,PL1H+2
     MOVE.L	#LAB_0088,D0
-    MOVE	D0,PL2L
+    MOVE	D0,PL2L+2
     SWAP	D0
-    MOVE	D0,PL2H
+    MOVE	D0,PL2H+2
     MOVE.L	#LAB_0089,D0
-    MOVE	D0,PL3L
+    MOVE	D0,PL3L+2
     SWAP	D0
-    MOVE	D0,PL3H
+    MOVE	D0,PL3H+2
 
 ; load the colours into the copper list.
     MOVEA.L	#COLOURPALETTE,A0
@@ -152,18 +152,18 @@ SCROLLVISIBLE:
     MOVE	D1,D0
     LSL		#4,D0
     OR		D1,D0
-    SUB		D0,SCRVAL
+    SUB		D0,SCRVAL+2
     BPL.S	.EndScrollVisible
-    ADDI	#$0110,SCRVAL
-    ADDQ	#2,PL1L
-    ADDQ	#2,PL2L
-    ADDQ	#2,PL3L
+    ADDI	#$0110,SCRVAL+2
+    ADDQ	#2,PL1L+2
+    ADDQ	#2,PL2L+2
+    ADDQ	#2,PL3L+2
     SUBQ	#2,POINTEROFFSET
     BPL.S	.EndScrollVisible
     ADDQ	#4,POINTEROFFSET
-    SUBQ	#4,PL1L
-    SUBQ	#4,PL2L
-    SUBQ	#4,PL3L
+    SUBQ	#4,PL1L+2
+    SUBQ	#4,PL2L+2
+    SUBQ	#4,PL3L+2
     BSR		SCROLLHIDDEN
     BSR		DOCHAR
     ADDI.L	#$00000004,SINEPTR
@@ -416,29 +416,22 @@ COPLIST:
     DC.W	DDFSTRT,$0030	; Set DDFSTRT to wide.
     DC.W	DDFSTOP,$00D0	; Set DDFSTOP to normal.
     DC.W	BPLCON0,$3200
-    DC.W	BPLCON1
 SCRVAL:
-    DC.W	$0000
+    DC.W	BPLCON1,$0000
     DC.W	BPL1MOD,$0006
     DC.W	BPL2MOD,$0006
-    DC.W	BPL1PTH
-PL1H:
-    DC.W	$0000
-    DC.W	BPL1PTL
+PL1H:    
+	DC.W	BPL1PTH,$0000
 PL1L:
-    DC.W	$0000
-    DC.W	BPL2PTH
+    DC.W	BPL1PTL,$0000
 PL2H:
-    DC.W	$0000
-    DC.W	BPL2PTL
+    DC.W	BPL2PTH,$0000
 PL2L:
-    DC.W	$0000
-    DC.W	BPL3PTH
+    DC.W	BPL2PTL,$0000
 PL3H:
-    DC.W	$0000
-    DC.W	BPL3PTL
+    DC.W	BPL3PTH,$0000
 PL3L:
-    DC.W	$0000
+    DC.W	BPL3PTL,$0000
 PALETTE:
     DS.W	16			; reserve 16 words for the colour palette.
     DC.W	$FFFF,$FFFE	; impossible position so end of the copper list.
@@ -510,11 +503,11 @@ SCROLLER:
     dc.B	'IS PROUD TO PRESENT A CHAR-SINE SCROLLER IN 1988 ---  SCROLLTEXT WRAPS  ---    '
 
     EVEN
-; The font graphic 320x200
+; The original font graphic 320x200
 FONT:
 ;	INCLUDE 'font.s'
 
-; raw font could be 320x160
+; raw font is 320x160 and has 3 bitplanes.
     INCBIN 'font.raw'
 
     EVEN
