@@ -148,9 +148,9 @@ LAB_0006:
 
 
 SCROLLVISIBLE:
-    MOVE	(SPEED,PC),D1
-    MOVE	D1,D0
-    LSL		#4,D0
+    MOVE	(SPEED,PC),D1			; Load the scroller speed in D1
+    MOVE	D1,D0					; move the sped into D0 as well
+    LSL		#4,D0					
     OR		D1,D0
     SUB		D0,SCRVAL+2
     BPL.S	.EndScrollVisible
@@ -177,6 +177,8 @@ SCROLLVISIBLE:
 ; A0 - Source
 ; A1 - Destination
 BLITTEXT:
+blth	= 32
+bltw	= 2
     MOVEM.L	A0-A1,-(A7)				; Save A0 and A1 to the stack
     BSR		BWAIT
     MOVE.L	#$FFFFFFFF,BLTAFWM(A5)	; Set BLTAFWM (blitter mask)
@@ -201,8 +203,6 @@ BLITTEXT:
     MOVE.L	A0,BLTAPTH(A5)			; Set BLTAPTH
     MOVE.L	A1,BLTDPTH(A5)			; Set BLTDPTH
     MOVE	#$0802,BLTSIZE(A5)		; Set BLTSIZE with height 32 and width 2
-    ADDA.L	#$00002580,A0
-    ADDA.L	#$00002580,A1
     MOVEM.L	(A7)+,A0-A1				; Restore A0 and A1 from the stack
     RTS								; return
 
@@ -413,11 +413,11 @@ COPLIST:
     DC.W	$0106,$0000
     DC.W	DIWSTRT,$2C81	; Set DIWSTRT to vertical 44 and horizontal 129
     DC.W	DIWSTOP,$F4C1	; Set DIWSTOP to vertical 244 and horizontal 193
-    DC.W	DDFSTRT,$0030	; Set DDFSTRT to wide.
+    DC.W	DDFSTRT,$0030	; Set DDFSTRT to wide - this is needed for horizontal scrolling.
     DC.W	DDFSTOP,$00D0	; Set DDFSTOP to normal.
     DC.W	BPLCON0,$3200
 SCRVAL:
-    DC.W	BPLCON1,$0000
+    DC.W	BPLCON1,$0000	; Set BPLCON1 - this is the delay in horizontal scrolling
     DC.W	BPL1MOD,$0006
     DC.W	BPL2MOD,$0006
 PL1H:    
