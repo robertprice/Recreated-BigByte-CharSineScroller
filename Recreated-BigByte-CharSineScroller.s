@@ -177,8 +177,9 @@ SCROLLVISIBLE:
 ; A0 - Source
 ; A1 - Destination
 BLITTEXT:
-blth	= 32
-bltw	= 2
+blth	= 32						; blit height 32
+bltw	= 2							; blit width 2
+
     MOVEM.L	A0-A1,-(A7)				; Save A0 and A1 to the stack
     BSR		BWAIT
     MOVE.L	#$FFFFFFFF,BLTAFWM(A5)	; Set BLTAFWM (blitter mask)
@@ -253,8 +254,6 @@ SCROLLHIDDEN:
     MOVE.L	A0,BLTAPTH(A5)
     MOVE.L	A1,BLTDPTH(A5)
     MOVE	#$0816,BLTSIZE(A5)	; set BLTSIZE with height 32 and width 22
-    ADDA.L	#$00002580,A0
-    ADDA.L	#$00002580,A1
     RTS
 
 ; A3 = address of current letter in the scoll text.
@@ -307,8 +306,6 @@ BLITLETTER:
     MOVE.L	A1,BLTDPTH(A5)
     MOVE	#$0802,BLTSIZE(A5)	; BLTSIZE (win/width, height) 0000100000000010    height = 32, width = 2
 ;	ADDA.L	#$00001F40,A0
-    ADDA.L	#$00001900,A0
-    ADDA.L	#$00002580,A1
     RTS
 
 
