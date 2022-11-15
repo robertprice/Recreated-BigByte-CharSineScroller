@@ -232,28 +232,37 @@ CLS:
 
 
 SCROLLHIDDEN:
+screenwidth = 320+32			; screen width of 320 pixels + 32 pixels for the next font character
+sh_blth		= 32				; scroll height of 32 pixels
+sh_bltw		= screenwidth/16		; screen width in words
+sh_bltskip 	= (screenwidth-320)/8
+sh_planes 	= 3					; 3 bitplanes
+
     MOVE	#$09F0,BLTCON0(A5)
     MOVE	#$0000,BLTCON1(A5)
-    MOVE	#$0004,BLTAMOD(A5)
-    MOVE	#$0004,BLTDMOD(A5)
+    MOVE	#sh_bltskip,BLTAMOD(A5)
+    MOVE	#sh_bltskip,BLTDMOD(A5)
     LEA		LAB_008C,A0
     LEA		LAB_008B,A1
     BSR		BWAIT
     MOVE.L	A0,BLTAPTH(A5)
     MOVE.L	A1,BLTDPTH(A5)
-    MOVE	#$0816,BLTSIZE(A5)	; set BLTSIZE with height 32 and width 22
+;    MOVE	#$0816,BLTSIZE(A5)	; set BLTSIZE with height 32 and width 22
+    MOVE	#((sh_blth*sh_planes)<<6)+sh_bltw,BLTSIZE(A5)	; set BLTSIZE with height 32 and width 22
     ADDA.L	#$00002580,A0
     ADDA.L	#$00002580,A1
     BSR		BWAIT
     MOVE.L	A0,BLTAPTH(A5)
     MOVE.L	A1,BLTDPTH(A5)
-    MOVE	#$0816,BLTSIZE(A5)	; set BLTSIZE with height 32 and width 22
+;    MOVE	#$0816,BLTSIZE(A5)	; set BLTSIZE with height 32 and width 22
+    MOVE	#((sh_blth*sh_planes)<<6)+sh_bltw,BLTSIZE(A5)	; set BLTSIZE with height 32 and width 22
     ADDA.L	#$00002580,A0
     ADDA.L	#$00002580,A1
     BSR		BWAIT
     MOVE.L	A0,BLTAPTH(A5)
     MOVE.L	A1,BLTDPTH(A5)
-    MOVE	#$0816,BLTSIZE(A5)	; set BLTSIZE with height 32 and width 22
+;    MOVE	#$0816,BLTSIZE(A5)	; set BLTSIZE with height 32 and width 22
+    MOVE	#((sh_blth*sh_planes)<<6)+sh_bltw,BLTSIZE(A5)	; set BLTSIZE with height 32 and width 22
     RTS
 
 ; A3 = address of current letter in the scoll text.
@@ -521,6 +530,7 @@ COLOURPALETTE:
 ; Reserve space for the screen in chip memory.
     SECTION S_1,BSS,CHIP
     
+; screen is 32 (hidden) + 320 (visible) + 32 (hidden) pixels wide, 80? pixels high, 3 bit planes
 SCREEN:
     DS.W	1
 LAB_0086:
