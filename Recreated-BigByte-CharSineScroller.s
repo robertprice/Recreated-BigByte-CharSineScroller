@@ -121,7 +121,7 @@ EXIT:
 
 SINEBLIT:
     LEA		LAB_008C,A0
-    MOVEA.L	#LAB_0087,A2
+    MOVEA.L	#LAB_0087,A2		; get the start of the visible screeen in A2
     LEA		(SINEDATA,PC),A4	; Set A4 to the start of the sine table
     ADDA.L	(SINEPTR,PC),A4		; Add the offset of the sineptr to A4 to get the current position in the sine table
     ADDQ.L	#2,SINEPTR			; increment the SINEPTR by 2 to get the next position in the sinetable
@@ -129,27 +129,28 @@ SINEBLIT:
     BNE.S	LAB_0004			; if it isn't skip the next instruction
     SUBI.L	#SINELEN,SINEPTR	; reset SINEPTR
 LAB_0004:
-    MOVEQ	#11,D6
+    MOVEQ	#11,D6				; the number of characters in d6 ((320 screen width + 32 hidden)/32 pixels font character width)
+								; D6 is how many charactes we need to blit onto the screen.
 LAB_0005:
-    MOVEA.L	A2,A1
-    MOVE	(A4),D0
-    LEA		(4,A4),A4
-    CMPA.L	#SINEEND,A4
-    BLT.S	LAB_0006
+    MOVEA.L	A2,A1				; move the character destination into A1
+    MOVE	(A4),D0				; get the sine value in D0
+    LEA		(4,A4),A4			; get the next entry in the sine table
+    CMPA.L	#SINEEND,A4			; check if it's the end of the sine table
+    BLT.S	LAB_0006			; skip the next instruction if we're not at the end of the sine table
     SUBA.L	#SINELEN,A4			; Reset A4 to the start of the sine table
 LAB_0006:
-    MULS	#$0030,D0
-    ADDA.L	D0,A1
-    BSR		BLITTEXT
-    ADDQ.L	#4,A0
-    ADDQ.L	#4,A2
+    MULS	#$0030,D0			; multiply the current sine value in D0 by 30hex
+    ADDA.L	D0,A1				; add D0 to A1 to get the destination to blit to
+    BSR		BLITTEXT			; blit the letter to the screen
+    ADDQ.L	#4,A0				
+    ADDQ.L	#4,A2				; move the desintation forward 32 pixels (4 words)
     DBF		D6,LAB_0005
     RTS
 
 
 SCROLLVISIBLE:
     MOVE	(SPEED,PC),D1			; Load the scroller speed in D1
-    MOVE	D1,D0					; move the sped into D0 as well
+    MOVE	D1,D0					; move the speed into D0 as well
     LSL		#4,D0					
     OR		D1,D0
     SUB		D0,SCRVAL+2
@@ -214,20 +215,19 @@ CLS:
     MOVE.L	A0,BLTDPTH(A5)
     MOVE	#$0000,BLTDMOD(A5)
     MOVE	#$0100,BLTCON0(A5)
-    MOVE	#$2818,BLTSIZE(A5)	; Set BLTSIZE with height 80 and width 24
+    MOVE	#$2818,BLTSIZE(A5)	; Set BLTSIZE with height 80 and width 384 (24 word)
     ADDA.L	#$00002580,A0
     BSR		BWAIT
     MOVE.L	A0,BLTDPTH(A5)
     MOVE	#$0000,BLTDMOD(A5)
     MOVE	#$0100,BLTCON0(A5)
-    MOVE	#$2818,BLTSIZE(A5)	; Set BLTSIZE with height 80 and width 24
+    MOVE	#$2818,BLTSIZE(A5)	; Set BLTSIZE with height 80 and width 384 (24 words)
     ADDA.L	#$00002580,A0
     BSR		BWAIT
     MOVE.L	A0,BLTDPTH(A5)
     MOVE	#$0000,BLTDMOD(A5)
     MOVE	#$0100,BLTCON0(A5)
-    MOVE	#$2818,BLTSIZE(A5)	; Set BLTSIZE with height 80 and width 24
-    ADDA.L	#$00002580,A0
+    MOVE	#$2818,BLTSIZE(A5)	; Set BLTSIZE with height 80 and width 384 (24 words)
     RTS
 
 
@@ -245,7 +245,7 @@ sh_planes 	= 3					; 3 bitplanes
     LEA		LAB_008C,A0
     LEA		LAB_008B,A1
     BSR		BWAIT
-    MOVE.L	A0,BLTAPTH(A5)
+    MOVE.L	A0,BLTAPTH(A5) 
     MOVE.L	A1,BLTDPTH(A5)
 ;    MOVE	#$0816,BLTSIZE(A5)	; set BLTSIZE with height 32 and width 22
     MOVE	#((sh_blth*sh_planes)<<6)+sh_bltw,BLTSIZE(A5)	; set BLTSIZE with height 32 and width 22
@@ -265,7 +265,7 @@ sh_planes 	= 3					; 3 bitplanes
     MOVE	#((sh_blth*sh_planes)<<6)+sh_bltw,BLTSIZE(A5)	; set BLTSIZE with height 32 and width 22
     RTS
 
-; A3 = address of current letter in the scoll text.
+; A3 = address of current letter in the scroll text.
 DOCHAR:
     LEA		(ASCIIVALUES,PC),A1			; load the start address of the ascii values into A1
     LEA		(CHARACTEROFFSETS,PC),A2	; load the start address of the character offsets in the font into A2
@@ -530,20 +530,22 @@ COLOURPALETTE:
 ; Reserve space for the screen in chip memory.
     SECTION S_1,BSS,CHIP
     
-; screen is 32 (hidden) + 320 (visible) + 32 (hidden) pixels wide, 80? pixels high, 3 bit planes
+; screen is 32 (hidden) + 320 (visible) + 32 (hidden) pixels wide, 240 pixels high, 3 bit planes
 SCREEN:
-    DS.W	1
-LAB_0086:
+    DS.W	1		; 32 pixels (hidden)
+LAB_0086:			; bit plane 1
     DS.L	479
     DS.W	1
-LAB_0087:
+LAB_0087:			; 40 lines from top
     DS.L	1920
     DS.W	1
-LAB_0088:
+LAB_0088:			; bit plane 2
     DS.L	2400
-LAB_0089:
+LAB_0089:			; bit plane 3
     DS.L	2399
     DS.W	1
+
+
 HIDDEN:
     DS.L	480
 LAB_008B:
